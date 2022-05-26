@@ -8,14 +8,18 @@
 
 const char* triangleSource = "#version 460 core\n"
 "layout(location = 0) in vec3 aPos;\n"
+"layout(location = 1) in vec3 aColor;\n"
+"out vec3 customColor;\n"
 "void main() {\n"
-"gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0f);\n"
+"gl_Position = vec4(aPos, 1.0);\n"
+"customColor = aColor;\n"
 "}";
 
 const char* triangleFrag = "#version 460 core\n"
 "out vec4 fragColor;\n"
+"in vec3 customColor;\n"
 "void main() {\n"
-"	fragColor = vec4(0.9f, 0.0f, 0.0f, 0.0f);\n"
+"	fragColor = vec4(customColor, 1.0);\n"
 "}";
 static int WIDTH = 1920;
 static int HEIGHT = 1080;
@@ -51,24 +55,30 @@ int main(int argc, char* argv[]) {
 	glfwSetKeyCallback(window, keyHandler);
 
 	glm::vec3 verticies[] = {
-	glm::vec3(-0.5f, -0.5f, -0.3f),
-	glm::vec3(0.5f, -0.5f, -0.2f),
-	glm::vec3(0.0f,  0.5f, -0.9f)
+	//pos                          //colors
+	glm::vec3(-0.5f, -0.5f, 0.0f), glm::vec3(1.0f, 0.0f, 0.0f),
+	glm::vec3(0.5f, -0.5f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f),
+	glm::vec3(0.5f,  0.5f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f),
+	glm::vec3(-0.5f, 0.5f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f)
 	};
 
-
+	unsigned int indicies[] = {
+		2, 1, 3,
+		1, 0, 3
+	};
 
 	//Doing the binding stuff here
-	unsigned int vboID;
-	unsigned int vaoID;
+	unsigned int vboID, vaoID, eboID;
 
+	glGenBuffers(1, &eboID);
 	glGenBuffers(1, &vboID);
 	glGenVertexArrays(1, &vaoID);
-
 	glBindVertexArray(vaoID);
 	glBindBuffer(GL_ARRAY_BUFFER, vboID);
-
 	glBufferData(GL_ARRAY_BUFFER, sizeof(verticies), verticies, GL_STATIC_DRAW);
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, eboID);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indicies), indicies, GL_STATIC_DRAW);
 
 	//Making the shader
 
@@ -114,20 +124,30 @@ int main(int argc, char* argv[]) {
 	glDeleteShader(vertexShader);
 	glDeleteShader(fragmentShader);
 
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+
+	//position
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
+
+	//color
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(1);
 
 	while (!glfwWindowShouldClose(window)) {
 
 		//Sets it a light red or something
 		glClearColor(250.0f / 255.0f, 119.0f / 255.0f, 110.0f / 255.0f, 1.0f);
-
 		glClear(GL_COLOR_BUFFER_BIT);
-
-
 		glUseProgram(shaderProgram);
+
+		//float time = glfwGetTime();
+		//float greenValue = sin(time) / 2.0f + 0.5f;
+		//int vertexLocation = glGetUniformLocation(shaderProgram, "customColor");
+		//glUniform4f(vertexLocation, 0.0f, greenValue, 0.0f, 1.0f);
+
+
 		glBindVertexArray(vaoID);
-		glDrawArrays(GL_TRIANGLES, 0, 3);
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
