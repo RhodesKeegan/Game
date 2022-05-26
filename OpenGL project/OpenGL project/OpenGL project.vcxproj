@@ -142,6 +142,7 @@
     <ClInclude Include="include\main.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="resources\shaders\fragment\triangle.glsl" />
     <None Include="resources\shaders\vertex\triangle.glsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

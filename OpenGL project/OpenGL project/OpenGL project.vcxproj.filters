@@ -29,5 +29,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\shaders\vertex\triangle.glsl" />
+    <None Include="resources\shaders\fragment\triangle.glsl" />
   </ItemGroup>
 </Project>
